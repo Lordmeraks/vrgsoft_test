@@ -64,12 +64,7 @@ class BookController extends Controller
         $authors = $request->authors;
         $authors = explode(',', $authors);
 
-        foreach ($authors as $author_id){
-            $author = Author::find($author_id);
-            $author->books()->attach($book->id);
-        }
-
-
+        $book->authors()->attach($authors);
 
         return $book;
     }
