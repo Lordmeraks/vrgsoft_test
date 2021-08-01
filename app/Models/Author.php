@@ -13,7 +13,7 @@ class Author extends Model
       'name', 'surname', 'patronymic'
     ];
 
-    public function editions(){
-        return $this->hasMany(Edition::class);
+    public function books(){
+        return $this->belongsToMany(Book::class, 'editions');
     }
 }
