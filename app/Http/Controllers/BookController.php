@@ -20,7 +20,7 @@ class BookController extends Controller
     public function index()
     {
         $authors = Author::all();
-        $books = Book::all();
+        $books = Book::paginate(15);
         return view('books.index', [
             'authors' => $authors,
             'books' => $books

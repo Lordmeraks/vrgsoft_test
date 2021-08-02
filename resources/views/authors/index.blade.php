@@ -43,6 +43,7 @@
                 нет
             </div>
         </div>
+        {{ $authors->links() }}
     </div>
 
     <!-- Modal -->

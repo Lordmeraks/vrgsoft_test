@@ -51,7 +51,10 @@
                 нет
             </div>
         </div>
+        {{ $books->links() }}
     </div>
+
+
 
     <!-- Modal -->
 
