@@ -52,12 +52,12 @@ class BookController extends Controller
             'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $path = $request->file('file')->store('img', 'public');
+        $path = self::upload($request);
 
         $book = Book::create([
             'name' => $request->name,
             'description' => $request->description,
-            'img' => '/storage/'.$path,
+            'img' => '/storage/' . $path,
             'publication' => $request->publication
         ]);
 
@@ -66,13 +66,20 @@ class BookController extends Controller
 
         $book->authors()->attach($authors);
 
+        $htmlAuthors = '';
+        foreach ($book->authors as $author){
+            $htmlAuthors .= "<p name='$author->id'>$author->name $author->surname</p>";
+        }
+
+        $book->htmlAuthors = $htmlAuthors;
+
         return $book;
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return Response
      */
     public function show($id)
@@ -83,7 +90,7 @@ class BookController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return Response
      */
     public function edit($id)
@@ -95,23 +102,62 @@ class BookController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param  int  $id
+     * @param int $id
      * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Book $book)
     {
-        //
+        $this->validate($request, [
+            'name' => 'required',
+            'publication' => 'required',
+            'authors' => 'required',
+            'file' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+
+        $book->name = $request->name;
+        $book->description = $request->description;
+        if ($request->hasFile('file')) {
+            $path = self::upload($request);
+            $book->img = '/storage/' . $path;
+        }
+        $book->publication = $request->publication;
+        $book->save();
+
+        $authors = $request->authors;
+        $authors = explode(',', $authors);
+
+        $book->authors()->detach();
+        $book->authors()->attach($authors);
+
+        $htmlAuthors = '';
+        foreach ($book->authors as $author){
+            $htmlAuthors .= "<p name='$author->id'>$author->name $author->surname</p>";
+        }
+
+        $book->htmlAuthors = $htmlAuthors;
+
+        return $book;
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      * @return Response
      */
     public function destroy(Book $book)
     {
         $book->delete();
         return 'ok';
+    }
+
+    /**
+     * @param Request $request
+     * @return false|string
+     */
+    public static function upload(Request $request)
+    {
+        return $request->file('file')->store('img', 'public');
     }
 }

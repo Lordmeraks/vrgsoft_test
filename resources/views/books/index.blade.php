@@ -32,7 +32,7 @@
                         @endif
                         <td>
                             @foreach($book->authors as $author)
-                                <p>{{$author->name}} {{$author->surname}}</p>
+                                <p name="{{$author->id}}">{{$author->name}} {{$author->surname}}</p>
                             @endforeach
                         </td>
                         <td>{{ $book->publication }}</td>
@@ -62,7 +62,7 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="addAuthorLabel">Добавление автора</h4>
+                    <h4 class="modal-title" id="addAuthorLabel">Добавление Книги</h4>
                 </div>
 
                 <div class="modal-body">
@@ -84,6 +84,7 @@
                     <div class="form-group">
                         <label for="publication">Дата публикации</label>
                         <input type="date" class="form-control" id="publication">
+                        <span class="text-danger" id="publication-input-error"></span>
                     </div>
                 </div>
 
@@ -95,6 +96,7 @@
                                 <option value="{{$author->id}}">{{$author->name}} {{$author->surname}}</option>
                             @endforeach
                         </select>
+                        <span class="text-danger" id="authors-input-error"></span>
                     </div>
                 </div>
 
@@ -124,22 +126,52 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="edname">Имя</label>
-                        <input type="text" class="form-control" id="edname">
-                        <span class="text-danger" id="edname-input-error"></span>
+                        <label for="name">Название</label>
+                        <input type="text" class="form-control" id="ed-name">
+                        <span class="text-danger" id="ed-name-input-error"></span>
                     </div>
                 </div>
+
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="edsurname">Фамилия</label>
-                        <input type="text" class="form-control" id="edsurname">
-                        <span class="text-danger" id="edsurname-input-error"></span>
+                        <label for="description">Описание</label>
+                        <textarea class="form-control" id="ed-description"></textarea>
+                        <span class="text-danger" id="ed-description-input-error"></span>
                     </div>
                 </div>
+
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="edpatronymic">Отчество</label>
-                        <input type="text" class="form-control" id="edpatronymic">
+                        <label for="publication">Дата публикации</label>
+                        <input type="date" class="form-control" id="ed-publication">
+                        <span class="text-danger" id="ed-publication-input-error"></span>
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="authors">Авторы - выберете авторов книги</label>
+                        <select multiple class="form-control" id="ed-authors" name="authors[]">
+                            @foreach($authors as $author)
+                                <option value="{{$author->id}}" class="option">{{$author->name}} {{$author->surname}}</option>
+                            @endforeach
+                        </select>
+                        <span class="text-danger" id="ed-authors-input-error"></span>
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="ed-cur-image">Текущая обложка:</label>
+                        <div id="ed-cur-image"></div>
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="image">Обложка</label>
+                        <input type="file" class="form-control" id="ed-image">
+                        <span class="text-danger" id="ed-image-input-error"></span>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -163,6 +195,8 @@
                 form_data.append('authors', $('#authors').val());
                 $('#name-input-error').text('');
                 $('#image-input-error').text('');
+                $('#authors-input-error').text('');
+                $('#publication-input-error').text('');
                 $.ajax({
                     url: '{{ route('books.store') }}',
                     type: "POST",
@@ -177,11 +211,24 @@
                         $('#authors-wrap').removeClass('hidden').addClass('show');
                         $('.alert').removeClass('show').addClass('hidden');
                         console.log(data);
+                        if (data['patronymic'] == null) {
+                            data['patronymic'] = '';
+                        }
+                        let str = '<tr><td>' + data.name +
+                            '</td><td>' + data.description +
+                            '</td><td>' + data.htmlAuthors +
+                            '</td><td>' + data.publication +
+                            '</td><td>' + '<img src='+ data.img + ' alt="" height="75">' +
+                            '<td><a href="" class="edit" data-href="/books/' + data.id + '" data-toggle="modal" data-target="#editAuthor">Изменить</a></td>' +
+                            '</td><td><a href="" class="delete" data-href="/books/' + data.id + '">Удалить</a></td></tr>';
+                        $('.table > tbody:last').append(str);
                     },
                     error: function (response) {
                         console.log(response);
 
                         $('#name-input-error').text(response.responseJSON.errors.name);
+                        $('#authors-input-error').text(response.responseJSON.errors.authors);
+                        $('#publication-input-error').text(response.responseJSON.errors.publication);
                         $('#image-input-error').text(response.responseJSON.errors.file);
                     }
                 });
@@ -213,24 +260,47 @@
             e.preventDefault();
             let el = $(this).parents('tr');
             let url = $(this).data('href');
-            changedTr = $(el).children()
-            $('#edname').val(changedTr[0].innerText);
-            $('#edsurname').val(changedTr[1].innerText);
-            $('#edpatronymic').val(changedTr[2].innerText);
+            changedTr = $(el).children();
+            $('#ed-name').val(changedTr[0].innerText);
+            $('#ed-description').val(changedTr[1].innerText);
+            let authors = changedTr[2].children;
+            let options = $('.option');
+            for (let i = 0; i<authors.length; i++){
+                let author_id = authors[i].attributes.name.value;
+                for (let j=0; j<options.length; j++){
+                    let $optval = $(options[j]);
+                    if ($optval.val() === author_id){
+                        $optval.prop('selected', true);
+                    }
+                }
+            }
+            $('#ed-publication').val(changedTr[3].innerText);
+            $('#ed-cur-image').html(changedTr[4].innerHTML);
             $('#update').data('href', url);
         });
 
         $('#update').on('click', function () {
-            let name = $('#edname').val();
-            let surname = $('#edsurname').val();
-            let patronymic = $('#edpatronymic').val();
+            let data = new FormData();
+            console.log($('#ed-image').prop('files')[0]);
+            if ($('#ed-image').prop('files')[0] !== undefined){
+                data.append('file', $('#ed-image').prop('files')[0]);
+            }
+            data.append('name', $('#ed-name').val());
+            data.append('description', $('#ed-description').val());
+            data.append('publication', $('#ed-publication').val());
+            data.append('authors', $('#ed-authors').val());
+            data.append('_method', 'PUT');
+            $('#ed-name-input-error').text('');
+            $('#ed-image-input-error').text('');
+            $('#ed-authors-input-error').text('');
+            $('#ed-publication-input-error').text('');
             let url = $(this).data('href');
-            $('#name-input-error').text('');
-            $('#surname-input-error').text('');
             $.ajax({
                 url: url,
-                type: "PUT",
-                data: {name: name, surname: surname, patronymic: patronymic},
+                type: "POST",
+                data: data,
+                contentType: false,
+                processData: false,
                 headers: {
                     'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
                 },
@@ -238,15 +308,20 @@
                     $('#editAuthor').modal('hide');
                     $('#authors-wrap').removeClass('hidden').addClass('show');
                     $('.alert').removeClass('show').addClass('hidden');
-                    changedTr[0].innerText = data['name'];
-                    changedTr[1].innerText = data['surname'];
-                    changedTr[2].innerText = data['patronymic'];
+                    console.log(data);
+                    changedTr[0].innerText = data.name;
+                    changedTr[1].innerText = data.description;
+                    changedTr[2].innerHTML = data.htmlAuthors;
+                    changedTr[3].innerHTML = data.publication;
+                    changedTr[4].innerHTML = '<img src='+ data.img + ' alt="" height="75">';
                 },
                 error: function (response) {
                     console.log(response);
 
-                    $('#edname-input-error').text(response.responseJSON.errors.name);
-                    $('#edsurname-input-error').text(response.responseJSON.errors.surname);
+                    $('#ed-name-input-error').text(response.responseJSON.errors.name);
+                    $('#ed-authors-input-error').text(response.responseJSON.errors.authors);
+                    $('#ed-publication-input-error').text(response.responseJSON.errors.publication);
+                    $('#ed-image-input-error').text(response.responseJSON.errors.file);
                 }
             });
         });

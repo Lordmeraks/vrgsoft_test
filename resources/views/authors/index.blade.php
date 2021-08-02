@@ -146,6 +146,7 @@
                         let str = '<tr><td>' + data['name'] +
                             '</td><td>' + data['surname'] +
                             '</td><td>' + data['patronymic'] +
+                            '<td><a href="" class="edit" data-href="/authors/' + data['id'] + '" data-toggle="modal" data-target="#editAuthor">Изменить</a></td>' +
                             '</td><td><a href="" class="delete" data-href="/authors/' + data['id'] + '">Удалить</a></td></tr>';
                         $('.table > tbody:last').append(str);
                     },
