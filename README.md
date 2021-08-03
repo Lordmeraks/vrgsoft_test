@@ -1,3 +1,17 @@
+<p>Install</p>
+
+<p>1. git clone https://github.com/Lordmeraks/vrgsoft_test.git projectName</p>
+<p>2. cd projectName </p>
+<p>3. composer install </p>
+<p>4. cp .env.example .env </p>
+<p>5. php artisan key:generate </p>
+Create an empty database for our application
+<br>
+In the .env file, add database information to allow Laravel to connect to the database
+<br>
+<p>6. php artisan migrate </p>
+
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
 <p align="center">
