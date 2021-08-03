@@ -83,7 +83,7 @@ class AuthorController extends Controller
      */
     public function show(Author $author)
     {
-        return $author;
+        //
     }
 
     /**
@@ -101,10 +101,11 @@ class AuthorController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param  int  $id
-     * @return Response
+     * @param Author $author
+     * @return array
+     * @throws ValidationException
      */
-    public function update(Request $request, Author $author)
+    public function update(Request $request, Author $author): array
     {
         $this->validate($request, [
             'name' => 'required',
@@ -127,9 +128,9 @@ class AuthorController extends Controller
      * Remove the specified resource from storage.
      *
      * @param Author $author
-     * @return Response
+     * @return string
      */
-    public function destroy(Author $author)
+    public function destroy(Author $author): string
     {
         $author->delete();
         return 'ok';

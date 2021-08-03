@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 
 class BookController extends Controller
 {
@@ -54,8 +55,9 @@ class BookController extends Controller
      *
      * @param Request $request
      * @return Response
+     * @throws ValidationException
      */
-    public function store(Request $request)
+    public function store(Request $request): Response
     {
         $this->validate($request, [
             'name' => 'required',
@@ -114,10 +116,11 @@ class BookController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param int $id
-     * @return Response
+     * @param Book $book
+     * @return Book
+     * @throws ValidationException
      */
-    public function update(Request $request, Book $book)
+    public function update(Request $request, Book $book): Book
     {
         $this->validate($request, [
             'name' => 'required',
@@ -155,10 +158,10 @@ class BookController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param int $id
-     * @return Response
+     * @param Book $book
+     * @return string
      */
-    public function destroy(Book $book)
+    public function destroy(Book $book): string
     {
         $book->delete();
         return 'ok';
