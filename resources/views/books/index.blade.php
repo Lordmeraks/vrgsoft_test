@@ -4,21 +4,30 @@
     <div class="container">
         <h1>Список книг</h1>
         <div class='row'>
-            <button type="button" class="btn btn-primary btn-lg pull-right" data-toggle="modal" data-target="#addAuthor">
+            <button type="button" class="btn btn-primary btn-lg pull-right" data-toggle="modal"
+                    data-target="#addAuthor">
                 Добавить книгу
             </button>
         </div>
         <br/>
+        <form action="{{route('books.index')}}" method="get">
+            <input type="search" name="search">
+            <input type="submit" value="поиск">
+        </form>
         <div class='row @if(count($books)!= 0) show @else hidden @endif' id='authors-wrap'>
             <table class="table table-striped ">
                 <thead>
                 <tr>
-                    <th>Название</th>
-                    <th>Описание</th>
-                    <th>Авторы</th>
-                    <th>Дата публикации</th>
-                    <th>Обложка</th>
-                    <th></th>
+                    @if($order == 'asc')
+                        <th><a href="{{route('books.index', 'order=desc')}}">Название</a></th>
+                    @else
+                        <th><a href="{{route('books.index', 'order=asc')}}">Название</a></th>
+                    @endif
+                        <th>Описание</th>
+                        <th>Авторы</th>
+                        <th>Дата публикации</th>
+                        <th>Обложка</th>
+                        <th></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -38,7 +47,8 @@
                         <td>{{ $book->publication }}</td>
                         <td><img src="{{ $book->img }}" alt="" height="75"></td>
                         <td><a href="" class="edit"
-                               data-href=" {{ route('books.update',$book->id) }} " data-toggle="modal" data-target="#editAuthor">Изменить</a></td>
+                               data-href=" {{ route('books.update',$book->id) }} " data-toggle="modal"
+                               data-target="#editAuthor">Изменить</a></td>
                         <td><a href="" class="delete"
                                data-href=" {{ route('books.destroy',$book->id) }} ">Удалить</a></td>
                     </tr>
@@ -156,7 +166,8 @@
                         <label for="authors">Авторы - выберете авторов книги</label>
                         <select multiple class="form-control" id="ed-authors" name="authors[]">
                             @foreach($authors as $author)
-                                <option value="{{$author->id}}" class="option">{{$author->name}} {{$author->surname}}</option>
+                                <option value="{{$author->id}}"
+                                        class="option">{{$author->name}} {{$author->surname}}</option>
                             @endforeach
                         </select>
                         <span class="text-danger" id="ed-authors-input-error"></span>
@@ -221,7 +232,7 @@
                             '</td><td>' + data.description +
                             '</td><td>' + data.htmlAuthors +
                             '</td><td>' + data.publication +
-                            '</td><td>' + '<img src='+ data.img + ' alt="" height="75">' +
+                            '</td><td>' + '<img src=' + data.img + ' alt="" height="75">' +
                             '<td><a href="" class="edit" data-href="/books/' + data.id + '" data-toggle="modal" data-target="#editAuthor">Изменить</a></td>' +
                             '</td><td><a href="" class="delete" data-href="/books/' + data.id + '">Удалить</a></td></tr>';
                         $('.table > tbody:last').append(str);
@@ -268,11 +279,11 @@
             $('#ed-description').val(changedTr[1].innerText);
             let authors = changedTr[2].children;
             let options = $('.option');
-            for (let i = 0; i<authors.length; i++){
+            for (let i = 0; i < authors.length; i++) {
                 let author_id = authors[i].attributes.name.value;
-                for (let j=0; j<options.length; j++){
+                for (let j = 0; j < options.length; j++) {
                     let $optval = $(options[j]);
-                    if ($optval.val() === author_id){
+                    if ($optval.val() === author_id) {
                         $optval.prop('selected', true);
                     }
                 }
@@ -285,7 +296,7 @@
         $('#update').on('click', function () {
             let data = new FormData();
             console.log($('#ed-image').prop('files')[0]);
-            if ($('#ed-image').prop('files')[0] !== undefined){
+            if ($('#ed-image').prop('files')[0] !== undefined) {
                 data.append('file', $('#ed-image').prop('files')[0]);
             }
             data.append('name', $('#ed-name').val());
@@ -316,7 +327,7 @@
                     changedTr[1].innerText = data.description;
                     changedTr[2].innerHTML = data.htmlAuthors;
                     changedTr[3].innerHTML = data.publication;
-                    changedTr[4].innerHTML = '<img src='+ data.img + ' alt="" height="75">';
+                    changedTr[4].innerHTML = '<img src=' + data.img + ' alt="" height="75">';
                 },
                 error: function (response) {
                     console.log(response);

@@ -17,10 +17,24 @@ class AuthorController extends Controller
      *
      * @return Application|Factory|View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $authors = Author::paginate(15);
-        return view('authors.index', ['authors' => $authors]);
+        if ($request->order){
+            $order = $request->order;
+        } else {
+            $order = 'asc';
+        }
+
+        if ($request){
+            $authors = Author::where('name', 'LIKE', '%'.$request->search.'%')->orWhere('surname', 'LIKE', '%'.$request->search.'%')->orderBy('surname', $order)->paginate(15);
+        }else{
+            $authors = Author::orderBy('surname', $order)->paginate(15);
+        }
+
+        return view('authors.index', [
+            'authors' => $authors,
+            'order' => $order
+        ]);
     }
 
     /**
@@ -120,4 +134,5 @@ class AuthorController extends Controller
         $author->delete();
         return 'ok';
     }
+
 }

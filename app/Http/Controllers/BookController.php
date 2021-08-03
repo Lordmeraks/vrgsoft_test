@@ -17,13 +17,25 @@ class BookController extends Controller
      *
      * @return Application|Factory|View
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->order){
+            $order = $request->order;
+        } else {
+            $order = 'asc';
+        }
+
+        if ($request){
+            $books = Book::where('name', 'LIKE', '%'.$request->search.'%')->orderBy('name', $order)->paginate(15);
+        }else{
+            $books = Book::orderBy('name', $order)->paginate(15);
+        }
+
         $authors = Author::all();
-        $books = Book::paginate(15);
         return view('books.index', [
             'authors' => $authors,
-            'books' => $books
+            'books' => $books,
+            'order' => $order
         ]);
     }
 

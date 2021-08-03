@@ -4,17 +4,26 @@
     <div class="container">
         <h1>Список авторов</h1>
         <div class='row'>
-            <button type="button" class="btn btn-primary btn-lg pull-right" data-toggle="modal" data-target="#addAuthor">
+            <button type="button" class="btn btn-primary btn-lg pull-right" data-toggle="modal"
+                    data-target="#addAuthor">
                 Добавить автора
             </button>
         </div>
         <br/>
+        <form action="{{route('authors.index')}}" method="get">
+            <input type="search" name="search">
+            <input type="submit" value="поиск">
+        </form>
         <div class='row @if(count($authors)!= 0) show @else hidden @endif' id='authors-wrap'>
             <table class="table table-striped ">
                 <thead>
                 <tr>
                     <th>Имя</th>
-                    <th>Фамилия</th>
+                    @if($order == 'asc')
+                        <th><a href="{{route('authors.index', 'order=desc')}}">Фамилия</a></th>
+                    @else
+                        <th><a href="{{route('authors.index', 'order=asc')}}">Фамилия</a></th>
+                    @endif
                     <th>Отчество</th>
                     <th></th>
                 </tr>
@@ -30,7 +39,8 @@
                             <td></td>
                         @endif
                         <td><a href="" class="edit"
-                               data-href=" {{ route('authors.update',$author->id) }} " data-toggle="modal" data-target="#editAuthor">Изменить</a></td>
+                               data-href=" {{ route('authors.update',$author->id) }} " data-toggle="modal"
+                               data-target="#editAuthor">Изменить</a></td>
                         <td><a href="" class="delete"
                                data-href=" {{ route('authors.destroy',$author->id) }} ">Удалить</a></td>
                     </tr>
